@@ -1,5 +1,14 @@
 import Main from "@/components/Main";
+import Login from "@/components/Login";
+import Dashboard from "@/components/Dashboard";
 
 export default function DashboardPage() {
-  return <Main></Main>;
+  const isAUthenticated = false;
+  let children = <Login />;
+
+  if (isAUthenticated) {
+    children = <Dashboard />;
+  }
+
+  return <Main>{children}</Main>;
 }

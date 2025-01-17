@@ -1,4 +1,4 @@
 export default function Main(props) {
   const { children } = props;
-  return <main>{children}</main>;
+  return <main className="flex-1">{children}</main>;
 }
