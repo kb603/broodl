@@ -39,16 +39,18 @@ export default function RootLayout({ children }) {
 
   return (
     <html lang="en">
-      <body
-        className={
-          "mx-auto flex min-h-screen w-full max-w-[1000px] flex-col text-sm text-slate-800 sm:text-base " +
-          opensans.className
-        }
-      >
-        {header}
-        {children}
-        {footer}
-      </body>
+      <AuthProvider>
+        <body
+          className={
+            "mx-auto flex min-h-screen w-full max-w-[1000px] flex-col text-sm text-slate-800 sm:text-base " +
+            opensans.className
+          }
+        >
+          {header}
+          {children}
+          {footer}
+        </body>
+      </AuthProvider>
     </html>
   );
 }

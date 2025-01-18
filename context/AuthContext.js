@@ -1,5 +1,11 @@
 "use client";
-import { auth, signInWithEmailAndPassword } from "firebase/auth";
+import { db } from "@/firebase";
+import {
+  auth,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut,
+} from "firebase/auth";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { createContext, useContext, useState, useEffect } from "react";
 
@@ -30,13 +36,35 @@ export function AuthProvider({ children }) {
   }
 
   useEffect(() => {
-    try {
-    } catch (error) {
-      console.log(error.message);
-    }
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      try {
+        // Set user to local context state
+        setLoading(true);
+        setCurrentUser(user);
+        if (!user) {
+          return;
+        }
+
+        // If user exists, fetch data from firestore database
+        console.log("Fetching user data from firestore");
+        const docRef = doc(db, "users", user.uid);
+        const docSnap = await getDoc(docRef);
+        let firebaseData = {};
+        if (docSnap.exists()) {
+          console.log("Found user data in firestore");
+          firebaseData = docSnap.data();
+        }
+        setUserDataObj(firebaseData);
+      } catch (error) {
+        console.log(error.message);
+      } finally {
+        setLoading(false);
+      }
+    });
+    return unsubscribe;
   }, []);
 
-  const value = {};
+  const value = { currentUser, userDataObj, signup, login, logout, loading };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
