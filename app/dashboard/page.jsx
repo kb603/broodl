@@ -3,7 +3,7 @@ import Login from "@/components/Login";
 import Dashboard from "@/components/Dashboard";
 
 export default function DashboardPage() {
-  const isAUthenticated = false;
+  const isAUthenticated = true;
   let children = <Login />;
 
   if (isAUthenticated) {
