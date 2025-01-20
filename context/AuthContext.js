@@ -1,13 +1,13 @@
 "use client";
-import { db } from "@/firebase";
+import { auth, db } from "@/firebase";
 import {
-  auth,
+  createUserWithEmailAndPassword,
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signOut,
 } from "firebase/auth";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { createContext, useContext, useState, useEffect } from "react";
+import { doc, getDoc } from "firebase/firestore";
+import React, { useContext, useState, useEffect } from "react";
 
 const AuthContext = React.createContext();
 
@@ -17,7 +17,7 @@ export function useAuth() {
 
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
-  const [userDataObj, setUserDataObj] = useState({});
+  const [userDataObj, setUserDataObj] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // AUTH HANDLERS
@@ -30,7 +30,7 @@ export function AuthProvider({ children }) {
   }
 
   function logout() {
-    setUserDataObj({});
+    setUserDataObj(null);
     setCurrentUser(null);
     return signOut(auth);
   }
@@ -38,25 +38,26 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       try {
-        // Set user to local context state
+        // Set the user to our local context state
         setLoading(true);
         setCurrentUser(user);
         if (!user) {
+          console.log("No User Found");
           return;
         }
 
-        // If user exists, fetch data from firestore database
-        console.log("Fetching user data from firestore");
+        // if user exists, fetch data from firestore database
+        console.log("Fetching User Data");
         const docRef = doc(db, "users", user.uid);
         const docSnap = await getDoc(docRef);
         let firebaseData = {};
         if (docSnap.exists()) {
-          console.log("Found user data in firestore");
+          console.log("Found User Data");
           firebaseData = docSnap.data();
         }
         setUserDataObj(firebaseData);
-      } catch (error) {
-        console.log(error.message);
+      } catch (err) {
+        console.log(err.message);
       } finally {
         setLoading(false);
       }
@@ -64,7 +65,15 @@ export function AuthProvider({ children }) {
     return unsubscribe;
   }, []);
 
-  const value = { currentUser, userDataObj, signup, login, logout, loading };
+  const value = {
+    currentUser,
+    userDataObj,
+    setUserDataObj,
+    signup,
+    logout,
+    login,
+    loading,
+  };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
